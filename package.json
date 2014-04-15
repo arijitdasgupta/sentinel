@@ -1,0 +1,36 @@
+{
+  "name": "Sentinel",
+  "version": "0.6.0",
+  "description": "HTTP monitoring and notification utility",
+  "keywords": [
+    "Sentinel",
+    "Node.js",
+    "application"
+  ],
+  "author": {
+    "name": "Arijit Dasgupta",
+    "email": "arijit.rivalslayer@gmail.com",
+    "url": "http://arijitdg.net"
+  },
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/"
+  },
+
+  "engines": {
+    "node": ">= 0.6.0",
+    "npm": ">= 1.0.0"
+  },
+
+  "dependencies": {
+    "unirest": ">=0.2.0",
+    "node-fs": ">=0.1.7",
+    "nodemailer": ">=0.6.1"
+  },
+  "devDependencies": {},
+  "bundleDependencies": [],
+
+  "private": true,
+  "main": "server.js"
+}

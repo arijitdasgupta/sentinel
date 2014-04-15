@@ -1,0 +1,36 @@
+{
+	"server": "localhost",
+	"port": 7000,
+	"contact":{
+		"sms-api":{
+			"api-name": "site2sms-mashape",
+			"props": {
+				"uid": "uid",
+				"pwd": "pwd",
+				"mashape-auth": "mashape-auth-token"
+			},
+			"enabled": true
+		},
+		"email-api":{
+			"api-name": "gmail-smtp",
+			"props":{
+				"uid": "uid@jed-i.in",
+				"pwd": "pwd"
+			},
+			"subject": "Message from the Wall",
+			"signature": "Men of Nightswatch"
+		}
+	},
+	"check-list":{
+		"Google": {
+			"url": "http://google.com",
+			"interval": 60,
+			"send_status_to": ["email@email.com", "email2@email.com", "9087654321"]
+		},
+		"Yahoo": {
+			"url": "http://yahoo.com",
+			"interval": 60,
+			"send_status_to": ["email@email.com", "9087654321"]
+		}
+	}
+}
