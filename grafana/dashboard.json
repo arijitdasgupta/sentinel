@@ -1,0 +1,538 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "sentinel",
+    "title": "Sentinel",
+    "description": "HTTP & TLS health checks",
+    "tags": ["sentinel", "monitoring"],
+    "timezone": "browser",
+    "editable": true,
+    "refresh": "5m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "host",
+          "type": "query",
+          "datasource": { "type": "prometheus" },
+          "query": "label_values(sentinel_target_up, host)",
+          "refresh": 2,
+          "includeAll": true,
+          "multi": true,
+          "current": { "text": "All", "value": "$__all" }
+        }
+      ]
+    },
+    "annotations": {
+      "list": []
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Target Status",
+        "description": "Current up/down state of each target",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "sentinel_target_up{host=~\"$host\"}",
+            "legendFormat": "",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Time" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "__name__" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "job" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "instance" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "url" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "host" },
+              "properties": [
+                { "id": "displayName", "value": "Host" },
+                { "id": "custom.width", "value": 400 }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value" },
+              "properties": [
+                { "id": "displayName", "value": "Status" },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+                  ]
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "color-background" }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "red" },
+                      { "value": 1, "color": "green" }
+                    ]
+                  }
+                },
+                { "id": "color", "value": { "mode": "thresholds" } }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{ "displayName": "Host", "desc": false }]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Uptime (24h)",
+        "description": "Percentage of successful checks over the last 24 hours",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "sum by (host) (increase(sentinel_checks_total{host=~\"$host\", result=\"success\"}[24h])) / sum by (host) (increase(sentinel_checks_total{host=~\"$host\"}[24h])) * 100",
+            "legendFormat": "",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Time" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "host" },
+              "properties": [
+                { "id": "displayName", "value": "Host" },
+                { "id": "custom.width", "value": 300 }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value" },
+              "properties": [
+                { "id": "displayName", "value": "Uptime %" },
+                { "id": "unit", "value": "percent" },
+                { "id": "decimals", "value": 2 },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "red" },
+                      { "value": 95, "color": "yellow" },
+                      { "value": 99, "color": "green" }
+                    ]
+                  }
+                },
+                { "id": "color", "value": { "mode": "thresholds" } },
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "gauge", "mode": "gradient" }
+                },
+                { "id": "min", "value": 0 },
+                { "id": "max", "value": 100 }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{ "displayName": "Host", "desc": false }]
+        }
+      },
+      {
+        "id": 3,
+        "title": "HTTP Status Codes",
+        "description": "Last observed HTTP status code per target",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "sentinel_target_status_code{host=~\"$host\"}",
+            "legendFormat": "",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Time" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "__name__" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "job" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "instance" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "url" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "host" },
+              "properties": [
+                { "id": "displayName", "value": "Host" },
+                { "id": "custom.width", "value": 300 }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value" },
+              "properties": [
+                { "id": "displayName", "value": "Status Code" },
+                { "id": "decimals", "value": 0 },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "blue" },
+                      { "value": 200, "color": "green" },
+                      { "value": 300, "color": "yellow" },
+                      { "value": 400, "color": "orange" },
+                      { "value": 500, "color": "red" }
+                    ]
+                  }
+                },
+                { "id": "color", "value": { "mode": "thresholds" } },
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "color-background" }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{ "displayName": "Host", "desc": false }]
+        }
+      },
+      {
+        "id": 4,
+        "title": "Response Latency",
+        "description": "HTTP check latency over time",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "sentinel_target_latency_seconds{host=~\"$host\"}",
+            "legendFormat": "{{ host }}",
+            "intervalFactor": 1,
+            "interval": "5m"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 15,
+              "gradientMode": "scheme",
+              "showPoints": "always",
+              "pointSize": 5,
+              "spanNulls": true,
+              "axisCenteredZero": false,
+              "axisLabel": "",
+              "scaleDistribution": { "type": "linear" }
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            },
+            "color": { "mode": "palette-classic" }
+          },
+          "overrides": []
+        },
+        "options": {
+          "tooltip": { "mode": "multi", "sort": "desc" },
+          "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Check Results Over Time",
+        "description": "Success vs failure check rate",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "increase(sentinel_checks_total{host=~\"$host\", result=\"success\"}[10m])",
+            "legendFormat": "{{ host }} success"
+          },
+          {
+            "expr": "increase(sentinel_checks_total{host=~\"$host\", result=\"failure\"}[10m])",
+            "legendFormat": "{{ host }} failure"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "bars",
+              "lineWidth": 1,
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "stacking": { "mode": "normal", "group": "A" },
+              "showPoints": "never"
+            },
+            "color": { "mode": "palette-classic" }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*failure.*" },
+              "properties": [
+                { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+              ]
+            },
+            {
+              "matcher": { "id": "byRegexp", "options": ".*success.*" },
+              "properties": [
+                { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": { "mode": "multi", "sort": "desc" },
+          "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }
+        }
+      },
+      {
+        "id": 6,
+        "title": "TLS Certificate Expiry",
+        "description": "Days until each certificate expires",
+        "type": "bargauge",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "sentinel_tls_cert_expiry_seconds{host=~\"$host\"} / 86400",
+            "legendFormat": "{{ host }}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "d",
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "red" },
+                { "value": 7, "color": "orange" },
+                { "value": 14, "color": "yellow" },
+                { "value": 30, "color": "green" }
+              ]
+            },
+            "color": { "mode": "thresholds" }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"] },
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        }
+      },
+      {
+        "id": 7,
+        "title": "TLS Status",
+        "description": "Certificate validity and HTTPS redirect status",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+        "datasource": { "type": "prometheus" },
+        "targets": [
+          {
+            "expr": "sentinel_tls_cert_valid{host=~\"$host\"}",
+            "legendFormat": "",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          },
+          {
+            "expr": "sentinel_tls_redirect{host=~\"$host\"}",
+            "legendFormat": "",
+            "format": "table",
+            "instant": true,
+            "refId": "B"
+          },
+          {
+            "expr": "sentinel_tls_cert_expiry_seconds{host=~\"$host\"} / 86400",
+            "legendFormat": "",
+            "format": "table",
+            "instant": true,
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Time" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "__name__" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "job" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "instance" },
+              "properties": [{ "id": "custom.hidden", "value": true }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value #A" },
+              "properties": [
+                { "id": "displayName", "value": "Cert Valid" },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "0": { "text": "INVALID", "color": "red" }, "1": { "text": "VALID", "color": "green" } } }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value #B" },
+              "properties": [
+                { "id": "displayName", "value": "HTTPS Redirect" },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "0": { "text": "NO", "color": "orange" }, "1": { "text": "YES", "color": "green" } } }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value #C" },
+              "properties": [
+                { "id": "displayName", "value": "Expires (days)" },
+                { "id": "unit", "value": "d" },
+                { "id": "decimals", "value": 0 },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "red" },
+                      { "value": 7, "color": "orange" },
+                      { "value": 30, "color": "green" }
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{ "displayName": "host", "desc": false }]
+        },
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Logs",
+        "description": "Sentinel application logs",
+        "type": "logs",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 38 },
+        "datasource": { "type": "loki" },
+        "targets": [
+          {
+            "expr": "{service_name=\"sentinel\"} | json",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "showCommonLabels": false,
+          "wrapLogMessage": true,
+          "prettifyLogMessage": true,
+          "enableLogDetails": true,
+          "sortOrder": "Descending",
+          "dedupStrategy": "none"
+        }
+      }
+    ],
+    "schemaVersion": 39,
+    "version": 0
+  },
+  "folderUid": "",
+  "overwrite": true
+}

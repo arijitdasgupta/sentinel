@@ -1,0 +1,7 @@
+interval: 5m
+timeout: 10s
+metrics_addr: ":9090"
+
+targets:
+  - https://example.com
+  - https://www.google.com
