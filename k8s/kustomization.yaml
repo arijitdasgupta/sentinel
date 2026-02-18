@@ -6,5 +6,5 @@ resources:
 
 images:
 - name: sentinel
-  newName: example.com/sentinel
-  newTag: v0.0.4
+  newName: registry.dazgupta.com/sentinel
+  newTag: v0.0.6
