@@ -102,9 +102,47 @@ docker run -v ./config.yaml:/etc/sentinel/config.yaml sentinel -config /etc/sent
 
 Deployment manifests are in `k8s/`. By default, sentinel runs with `--discover` and auto-discovers targets from Ingress resources.
 
+### Ingress discovery
+
+When running with `--discover`, sentinel uses the Kubernetes [informer](https://pkg.go.dev/k8s.io/client-go/informers) API to watch all Ingress resources across every namespace. On any ingress add, update, or delete, it rebuilds its target list by extracting every unique hostname from `spec.rules[].host` and monitoring `https://<host>`. Targets update in real time — no restarts or config reloads needed.
+
+This means sentinel automatically picks up new services the moment an ingress is created, and stops monitoring them when the ingress is removed.
+
 ### RBAC
 
-Sentinel needs read-only access to Ingress resources. The required ServiceAccount, ClusterRole, and ClusterRoleBinding are managed via Terraform in the infrastructure repo. The deployment references `serviceAccountName: sentinel`.
+Sentinel needs a ServiceAccount with read-only access to Ingress resources. Here's a minimal RBAC setup:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sentinel
+  namespace: apps
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sentinel
+rules:
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sentinel
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: sentinel
+subjects:
+  - kind: ServiceAccount
+    name: sentinel
+    namespace: apps
+```
+
+A ClusterRole (not a namespaced Role) is required because sentinel watches ingresses across all namespaces. The deployment references `serviceAccountName: sentinel`.
 
 ### Deploy
 
