@@ -89,19 +89,6 @@ jobs:
           git commit -m "Update image to ${{ steps.get_version.outputs.new_version }}" || true
           git push origin main
 
-      - name: Push Grafana dashboard
-        run: |
-          HTTP_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" \
-            -X POST "${{ secrets.GRAFANA_URL }}/api/dashboards/db" \
-            -H "Authorization: Bearer ${{ secrets.GRAFANA_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d @grafana/dashboard.json)
-          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
-            echo "Dashboard pushed successfully (HTTP $HTTP_STATUS)"
-          else
-            echo "::warning::Failed to push Grafana dashboard (HTTP $HTTP_STATUS)"
-          fi
-
       - name: Deploy to Kubernetes
         env:
           KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
