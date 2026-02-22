@@ -162,24 +162,6 @@ GitHub Actions workflow builds, pushes, and deploys on every push to `main`.
 | `DOCKER_USERNAME` | Registry login username |
 | `DOCKER_PASSWORD` | Registry login password |
 | `KUBECONFIG` | Base64-encoded kubeconfig for deploy |
-| `GRAFANA_URL` | Grafana base URL |
-| `GRAFANA_TOKEN` | Grafana service account token |
-
-## Grafana Dashboard
-
-A pre-built dashboard is included in `grafana/dashboard.json` and automatically pushed to Grafana on every deploy via the API.
-
-**Panels:**
-
-| Panel | Type | What it shows |
-|---|---|---|
-| Target Status | Stat (green/red) | At-a-glance UP/DOWN per host |
-| Uptime (24h) | Gauge | Percentage of successful checks |
-| HTTP Status Codes | Stat (color-coded) | Last status code per target |
-| Response Latency | Time series (smooth lines, gradient fill) | Latency over time with mean/max in legend |
-| Check Results | Stacked bars (green/red) | Success vs failure rate over time |
-| TLS Certificate Expiry | Bar gauge (gradient, red→green) | Days until each cert expires |
-| TLS Status | Table (color-coded text) | Cert validity, HTTPS redirect, expiry per host |
 
 ## License
 
