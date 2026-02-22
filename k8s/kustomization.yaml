@@ -7,4 +7,4 @@ resources:
 images:
 - name: sentinel
   newName: registry.dazgupta.com/sentinel
-  newTag: v1.0.4
+  newTag: v1.0.5
