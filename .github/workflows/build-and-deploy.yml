@@ -101,3 +101,14 @@ jobs:
           mkdir -p ~/.kube
           echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
           kubectl apply -k k8s/
+
+  notify-failure:
+    needs: [test, build-and-deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send ntfy notification
+        run: |
+          curl -u "github:${{ secrets.NTFY_PASSWORD }}" \
+            -d "❌ ${{ github.repository }} deploy failed on ${{ github.ref_name }} (${{ github.sha }})" \
+            "${{ secrets.NTFY_URL }}/gh-alerts"
